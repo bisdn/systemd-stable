@@ -224,6 +224,7 @@ static int network_load_one(Manager *manager, const char *filename) {
         network->fast_leave = -1;
         network->allow_port_to_be_root = -1;
         network->unicast_flood = -1;
+        network->multicast_to_unicast = -1;
         network->priority = LINK_BRIDGE_PORT_PRIORITY_INVALID;
 
         network->lldp_mode = LLDP_MODE_ROUTERS_ONLY;
