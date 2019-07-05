@@ -45,9 +45,9 @@ static int find_next_bit(int i, uint32_t x) {
 
 static int append_vlan_info_data(Link *const link, sd_netlink_message *req, uint16_t pvid, const uint32_t *br_vid_bitmap, const uint32_t *br_untagged_bitmap) {
         struct bridge_vlan_info br_vlan;
-        int i, j, k, r, done, cnt;
+        int i, j, k, r, cnt;
         uint16_t begin, end;
-        bool untagged = false;
+        bool done, untagged = false;
 
         assert(link);
         assert(req);
@@ -64,7 +64,7 @@ static int append_vlan_info_data(Link *const link, sd_netlink_message *req, uint
 
                 base_bit = k * 32;
                 i = -1;
-                done = 0;
+                done = false;
                 do {
                         j = find_next_bit(i, vid_map);
                         if (j > 0) {
@@ -81,7 +81,7 @@ static int append_vlan_info_data(Link *const link, sd_netlink_message *req, uint
                                         goto next;
                                 }
                         } else
-                                done = 1;
+                                done = true;
 
                         if (begin != UINT16_MAX) {
                                 cnt++;
@@ -150,9 +150,9 @@ static int set_brvlan_handler(sd_netlink *rtnl, sd_netlink_message *m, Link *lin
 
 int br_vlan_configure(Link *link, uint16_t pvid, uint32_t *br_vid_bitmap, uint32_t *br_untagged_bitmap) {
         _cleanup_(sd_netlink_message_unrefp) sd_netlink_message *req = NULL;
-        int r;
-        uint16_t flags;
         sd_netlink *rtnl;
+        uint16_t flags;
+        int r;
 
         assert(link);
         assert(link->manager);
@@ -254,8 +254,9 @@ int config_parse_brvlan_pvid(const char *unit, const char *filename,
                              int ltype, const char *rvalue, void *data,
                              void *userdata) {
         Network *network = userdata;
-        int r;
         uint16_t pvid;
+        int r;
+
         r = parse_vlanid(rvalue, &pvid);
         if (r < 0)
                 return r;
@@ -272,8 +273,8 @@ int config_parse_brvlan_vlan(const char *unit, const char *filename,
                              int ltype, const char *rvalue, void *data,
                              void *userdata) {
         Network *network = userdata;
-        int r;
         uint16_t vid, vid_end;
+        int r;
 
         assert(filename);
         assert(section);
